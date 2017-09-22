@@ -1,0 +1,143 @@
+<div class="row col-md-12">
+  <div class="btn-group">
+    <button class="btn btn-primary" ng-click="step=1" ng-disabled="step===1">Por Consultor</button>
+    <button class="btn btn-primary" ng-click="step=2" ng-disabled="step===2">Por Cliente</button>
+  </div>
+  <hr />
+  <table class="table table-responsive">
+    <tbody>
+      <tr>
+        <td>
+          <strong>Periodo</strong>
+        </td>
+        <td>
+          <div class="col-md-6">
+            <div class="input-group">
+               <span class="input-group-addon" id="sizing-addon1">Inicio</span>
+              <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="date1" is-open="popup1.opened" datepicker-options="dateOptions" required close-text="Close" alt-input-formats="altInputFormats" datepicker-mode="'month'" ng-disabled="selectedConsultores.length > 0"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="input-group">
+               <span class="input-group-addon" id="sizing-addon1">Término</span>
+              <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="date2" is-open="popup2.opened" datepicker-options="dateOptions" required close-text="Close" alt-input-formats="altInputFormats" datepicker-mode="'month'" ng-disabled="selectedConsultores.length > 0"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <hr />
+            <div class="alert alert-danger" ng-show="date1>date2">
+              <strong>Atención: </strong> La fecha de inicio no puede ser mayor a la de término.
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong ng-show="step===1">Consultores</strong>
+          <strong ng-show="step===2">Clientes</strong>
+        </td>
+        <td>
+          <div class="col-md-12" ng-show="step===1">
+            <select class="form-control" ng-options="consultor.no_usuario for consultor in consultores" ng-model="consultorSelected" ng-change="addConsultor(consultorSelected)" ng-disabled="!date1 || !date2 || date1>date2">
+              <option style="display:none" value="">Añada un consultor a la lista</option>
+            </select>
+          </div>
+          <div class="col-md-12" ng-show="step===2">
+             <select class="form-control">
+              <option style="display:none" value="">Añada un cliente a la lista</option>
+            </select>
+          </div>
+          <div class="col-md-12">
+          <hr />
+            <button class="btn btn-warning pull-right" ng-click="reset()"><i class="fa fa-eraser" aria-hidden="true"></i> Reset</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <hr />
+  <div class="col-md-12" ng-show="step===1">
+    <div class="alert alert-info" ng-show="selectedConsultores.length === 0">
+      <strong>Atención: </strong> Selecciona los consultores desde la lista para generar los reportes.
+    </div>
+  </div>
+  <div class="col-md-12" ng-show="selectedConsultores.length > 0">
+    <h4 class="text-center">Lista de consultores para reporte</h4>
+    <div class="label label-primary label-space" ng-repeat="consultor in selectedConsultores">
+      {{consultor.no_usuario}}
+    </div>
+  </div>
+</div>
+<div class="row col-md-12">
+  <div class="text-center">
+    <div class="btn-group" ng-show="selectedConsultores.length > 0">
+      <button class="btn btn-primary" ng-click="report=1" ng-disabled="report===1">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i> Relatorio
+      </button>
+      <button class="btn btn-primary" ng-click="report=2" ng-disabled="report===2">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i> Gráfico
+      </button>
+      <button class="btn btn-primary" ng-click="report=3" ng-disabled="report===3">
+        <i class="fa fa-pie-chart" aria-hidden="true"></i> Torta
+      </button>
+    </div>
+  </div>    
+    <div class="col-md-12" ng-show="step===1">
+      <table class="table table-responsive" ng-show="report === 1" ng-repeat="relatorio in relatorios">
+        <caption>{{relatorio[0].no_usuario}}</caption>
+        <thead>
+          <tr>
+            <th>Periodo</th>
+            <th>Ganancias Netas</th>
+            <th>Costo Fijo</th>
+            <th>Comisión</th>
+            <th>Lucro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="periodo in relatorio"> 
+            <td>{{periodo.fecha_emision}}</td>
+            <td ng-class="{ red: periodo.ganancias_netas < 0 }">{{periodo.ganancias_netas | currency: "R$ "}}</td>
+            <td ng-class="{ red: periodo.costo_fijo < 0 }">{{periodo.costo_fijo | currency: "R$ "}}</td>
+            <td ng-class="{ red: periodo.comision < 0 }">{{periodo.comision | currency: "R$ "}}</td>
+            <td ng-class="{ red: periodo.lucro < 0 }">{{periodo.lucro | currency: "R$ "}}</td>
+          </tr>
+          <tr class="active">
+            <td><strong>SALDO</strong></td>
+            <td ng-class="{ red: relatorio < 0 }">{{relatorio | sumByColumn: 'ganancias_netas' | currency: "R$ "}}</td>
+            <td ng-class="{ red: relatorio < 0 }">{{relatorio | sumByColumn: 'costo_fijo' | currency: "R$ "}}</td>
+            <td ng-class="{ red: relatorio < 0 }">{{relatorio | sumByColumn: 'comision' | currency: "R$ "}}</td>
+            <td ng-class="{ red: relatorio < 0 }">{{relatorio | sumByColumn: 'lucro' | currency: "R$ "}}</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="col-md-12" ng-if="report === 2">
+        <div google-chart chart="chart1" style="{{chart1.cssStyle}}"></div>
+      </div>
+      <div class="col-md-12" ng-if="report === 3">
+        <div google-chart chart="chart2" style="{{chart2.cssStyle}}"></div>
+      </div>
+    </div>
+     
+    <div class="col-md-12">
+      <table class="table table-responsive" ng-show="report === 1 && step===2 || report === 2 && step===2 || report === 3 && step===2">
+        <thead>
+          <tr>
+            <th>Periodo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>data</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
